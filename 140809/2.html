@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<style>
+body,heml{margin:0; padding:0;}
+.bannerWrap{ position:relative; margin:0 auto;width:1000px; height:350px; background-color:#F0E262; overflow:hidden;}
+.bannerWrap img{ display:block; position:absolute;}
+</style>
+<script src="jq.js"></script>
+<meta charset="utf-8">
+<title>层级图片轴动效果</title>
+</head>
+
+<body>
+
+<div class="bannerWrap" id="bannerWrap">
+    <img src="house2.png" class="small_house" id="small_house" />
+    <img src="house1.png" class="house" id="house" />
+    <img src="fish.png" class="fish" id="fish" />
+    <img src="404.png" class="info" id="info" />
+</div><!--bannerWrap结束-->
+
+<script type="text/javascript">
+$(function(){
+  var win_w, win_h,b_w, b_h,
+  small_house, house, fish, info, pToW_w, pToW_h, $img,
+  temp_p_l, temp_p_t;
+  
+  var $banner = $("#bannerWrap");
+  var picArray = "small_house,house,fish,info".split(",");
+  small_house = { l: 200, t: -140, s: 0.09, isFront: false },  //smallhouse的参数
+  house = { l: 70, t: -130, s: 0.05, isFront: false },  //house的参数
+  fish = { l: -160, t: -90, s: 0.02, isFront: true },  //fish的参数
+  info = { l: -410, t: -110, s: 0.03, isFront: true };  //info的参数
+  
+  var setPst = function(x, y){
+	  x = x||win_w/2;
+	  y = y||win_h/2;
+	  $.each( picArray, function(i ,id){    
+	  	  $img = $("#"+ id);
+		  temp_p_l = pToW_w * eval(id+".s") * x ;   
+		  temp_p_t = pToW_h * eval(id+".s") * y ;    
+		  if(eval(id +".isFront")){     //判断是否前景元素
+			  $img.css({"left": b_w/2 + eval(id +".l") + temp_p_l , "top": b_h/2 + eval(id +".t") + temp_p_t });  //这里的b_w/2和b_h/2是为了保证窗口缩放时还能在相对位置
+		  }else{
+			  $img.css({"left": b_w/2 + eval(id +".l") - temp_p_l , "top": b_h/2 + eval(id +".t") - temp_p_t }); 
+		  }
+	  })
+  }
+    
+  var resetImg = function(){ 
+	  b_w = $banner.width();      //初始化获取banner宽度
+	  b_h = $banner.height();     //初始化获取banner高度
+	  win_w = $(window).width();     //初始化获取屏幕宽度
+	  win_h = $(window).height();     //初始化获取屏幕高度
+	  pToW_w = $banner.width()/win_w;     //初始化获取banner宽度和屏幕宽度的比例
+	  pToW_h = $banner.height()/win_h;     //初始化获取banner高度和屏幕高度的比例
+	 
+	  setPst();  
+  }
+  
+  resetImg();
+  $(window).on("resize",resetImg);      //屏幕缩放时重新初始化数据
+  
+  $("body,html").mousemove(function(e){
+	  setPst(e.pageX, e.pageY);
+  })
+
+})
+</script>
+</body>
+</html>
