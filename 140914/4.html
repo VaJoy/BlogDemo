@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>裁剪头像</title>
+    <script src="jq.js"></script>
+    <style type="text/css">
+      body {background-color: #333;}
+	  .pic_wrap{ position:relative; float:left; width:320px; height:320px; background:black; margin:100px; }
+	  .pic_wrap img{position:absolute;width:320px; height:320px;}
+	  .pic1{opacity:0.5;}
+	  .pic2{clip:rect(0 150px 150px 0);}
+	  .clip_box{position:absolute;width:150px; height:150px; border:solid 1px white; margin-left:-1px; margin-top:-1px; cursor:move;}
+	  .clip_box span{display:block; position:absolute; width:8px; height:9px; background:white; border-radius:4px;}
+	  #lt{left:-4px; top:-4px; cursor:nw-resize;}
+	  #rt{right:-4px; top:-4px; cursor:ne-resize}
+	  #lb{left:-4px; bottom:-4px; cursor:sw-resize}
+	  #rb{right:-4px; bottom:-4px; cursor:se-resize}
+    </style>
+    <script type="text/javascript">
+    $(function(){
+		var $picWrap = $("#pic_wrap");
+		var $rawPic = $picWrap.find("img:eq(0)");
+		var $clipPic = $picWrap.find("img:eq(1)");
+		var $clipBox = $("#clip_box");
+		var $lt = $("#lt");
+		var $rt = $("#rt");
+		var $lb = $("#lb");
+		var $rb = $("#rb");
+		var wrap_w = $picWrap.width(); 
+		
+		var isResize = !1; //判断是否按下某个小圆点
+		var flag = ""; //存放“按下的是哪一个小圆点”的信息
+		$lt.mousedown(function(){
+			isResize=!0;
+			flag = "leftTop";
+		})
+		$rt.mousedown(function(){
+			isResize=!0;
+			flag = "rightTop";
+		})
+		$lb.mousedown(function(){
+			isResize=!0;
+			flag = "leftDown";
+		})
+		$rb.mousedown(function(){
+			isResize=!0;
+			flag = "rightDown";
+		})
+		$(window).mouseup(function(){   //鼠标松开则重置标志变量
+			isResize=!1;
+			flag = "";
+		})
+		
+		$picWrap.mousemove(function(e){
+			if(isResize){
+				var x = e.pageX;
+				var y = e.pageY;
+				switch(flag){
+					case "leftTop":leftTop(x);break;
+					//.....
+					default: break;
+				}
+			}
+		})
+		function leftTop(x){
+			var box_ol = $clipBox.offset().left;
+			var box_pl = $clipBox.position().left;
+			var box_pt = $clipBox.position().top;
+			var box_w = $clipBox.width();
+			var s = x - box_ol;
+			var newLeft = box_pl + s;
+			var newWidth = box_w - s;
+			var newTop = box_pt + s;
+			$clipBox.css({"left":newLeft,"width":newWidth,"height":newWidth,"top":newTop});
+		}
+	})
+    </script>
+  </head>
+  <body>
+		<div class="pic_wrap" id="pic_wrap">
+        	<img class="pic1" src="logo.jpg" />
+            <img class="pic2" src="logo.jpg" />
+            <div class="clip_box" id="clip_box">
+            	<span id="lt"></span>
+                <span id="rt"></span>
+                <span id="lb"></span>
+                <span id="rb"></span>
+            </div>
+        </div>
+  </body>
+</html>

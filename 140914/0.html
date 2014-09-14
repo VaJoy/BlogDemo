@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>裁剪头像</title>
+    <script src="jq.js"></script>
+    <style type="text/css">
+      body {background-color: #333;}
+	  .pic_wrap{ position:relative;float:left; width:320px; height:320px; background:black; overflow:hidden; }
+	  .pic_wrap img{position:absolute;width:320px; height:320px;}
+	  .pic1{opacity:0.5;}
+	  .pic2{clip:rect(0 150px 150px 0);}
+	  .clip_box{position:absolute;width:150px; height:150px; border:solid 1px white;}
+    </style>
+    <script type="text/javascript">
+    $(function(){
+		var $picWrap = $("#pic_wrap");
+		var $rawPic = $picWrap.find("img:eq(0)");
+		var $clipPic = $picWrap.find("img:eq(1)");
+		var $clipBox = $("#clip_box");
+	})
+    </script>
+  </head>
+  <body>
+		<div class="pic_wrap" id="pic_wrap">
+        	<img class="pic1" src="logo.jpg" />
+            <img class="pic2" src="logo.jpg" />
+            <div class="clip_box" id="clip_box">
+            </div>
+        </div>
+  </body>
+</html>

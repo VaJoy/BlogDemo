@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>裁剪头像</title>
+    <script src="jq.js"></script>
+    <script src="draggable.js"></script> 
+    <style type="text/css">
+      body {background-color: #333;}
+	  .pic_wrap{ position:relative; float:left;margin:100px;  width:320px; height:320px; background:black; }
+	  .pic_wrap img{position:absolute;width:320px; height:320px;}
+	  .pic1{opacity:0.5;}
+	  .pic2{clip:rect(0 150px 150px 0);}
+	  .clip_box{position:absolute; margin-left:-1px; margin-top:-1px;width:150px; height:150px; border:solid 1px white; cursor:move;}
+	  .clip_box span{display:block; position:absolute; width:8px; height:9px; background:white; border-radius:4px;}
+	  #lt{left:-4px; top:-4px; cursor:nw-resize;}
+	  #rt{right:-4px; top:-4px; cursor:ne-resize}
+	  #lb{left:-4px; bottom:-4px; cursor:sw-resize}
+	  #rb{right:-4px; bottom:-4px; cursor:se-resize}
+	  .preview{ margin-top:100px; position:relative; float:left;width:100px; height:100px; overflow:hidden;}
+	  .pic3{ position:absolute;}
+    </style>
+    <script type="text/javascript">
+    $(function(){
+		var $picWrap = $("#pic_wrap");
+		var $rawPic = $picWrap.find("img:eq(0)");
+		var $clipPic = $picWrap.find("img:eq(1)");
+		var $clipBox = $("#clip_box");
+		var $prePic = $("#pic3");    //获取预览图
+		var prebox_w = $("#preview").width();    //获取预览图容器宽度/高度
+		var $lt = $("#lt");
+		var $rt = $("#rt");
+		var $lb = $("#lb");
+		var $rb = $("#rb");
+		var wrap_w = $picWrap.width();  
+		var isResize = !1;
+		var flag = ""; 
+		$lt.mousedown(function(e){
+			e.stopPropagation();
+			isResize=!0;
+			flag = "leftTop";
+		})
+		$rt.mousedown(function(e){
+			e.stopPropagation();
+			isResize=!0;
+			flag = "rightTop";
+		})
+		$lb.mousedown(function(e){
+			e.stopPropagation();
+			isResize=!0;
+			flag = "leftDown";
+		})
+		$rb.mousedown(function(e){
+			e.stopPropagation();
+			isResize=!0;
+			flag = "rightDown";
+		})
+		$(window).mouseup(function(){  
+			isResize=!1;
+			flag = "";
+		})
+		$clipBox.find("span").mousemove(function(e){ 
+			e.stopPropagation();
+		})
+		$clipBox.draggable({
+			 containment: "#pic_wrap",
+			 drag: function(){ 
+				 setClip();
+			 },
+			 stop: function(){
+				 var box_pl = $clipBox.position().left;
+				 var box_pt = $clipBox.position().top;
+				 var box_w = $clipBox.width();
+				 if(box_pl+box_w>wrap_w){
+					 var l = wrap_w - box_w;
+					 $clipBox.css("left",l);
+				 }
+				 if(box_pt+box_w>wrap_w){
+					 var t = wrap_w - box_w;
+					 $clipBox.css("top",t);
+				 }
+				 setClip();
+			 }
+		}); 
+		$picWrap.mousemove(function(e){
+			if(isResize){
+				var x = e.pageX;
+				var y = e.pageY;
+				switch(flag){
+					case "leftTop":leftTop(x);console.log("aa");break;
+					case "rightTop":rightTop(y);break;
+					case "leftDown":leftDown(x);break;
+					case "rightDown":rightDown(y);break;
+					default: break;
+				}
+			}
+		})
+		function leftTop(x){
+			var box_ol = $clipBox.offset().left;
+			var box_pl = $clipBox.position().left;
+			var box_pt = $clipBox.position().top;
+			var box_w = $clipBox.width();
+			var s = x - box_ol;
+			var newLeft = box_pl + s;
+			var newWidth = box_w - s;
+			var newTop = box_pt + s;
+			newLeft = newLeft<=0?0:newLeft;  
+			newTop = newTop<=0?0:newTop;
+			if(newTop+newWidth>=wrap_w){
+				newWidth = newWidth<8?8:newWidth;
+				newLeft = newLeft+newWidth>wrap_w?newLeft-8:newLeft;
+				newTop = wrap_w - newWidth;
+			}
+			if(newLeft+newWidth>=wrap_w-8){
+				newWidth = newWidth<8?8:newWidth;
+				newLeft = wrap_w - newWidth;
+			}
+			$clipBox.css({"left":newLeft,"width":newWidth,"height":newWidth,"top":newTop});
+			
+			setClip();  
+		}
+		function rightTop(y){
+			var box_ot = $clipBox.offset().top;
+			var box_pt = $clipBox.position().top;
+			var box_pl = $clipBox.position().left;
+			var box_h = $clipBox.height();
+			var s = y - box_ot;
+			var newTop = box_pt + s;
+			var newHeight = box_h - s;
+			newTop = newTop<=0?0:newTop;
+			if(newHeight+box_pl>=wrap_w){
+				return false;
+			}
+			$clipBox.css({"top":newTop,"width":newHeight,"height":newHeight});
+			setClip();
+		}
+		function leftDown(x){
+			var box_ol = $clipBox.offset().left;
+			var box_pl = $clipBox.position().left;
+			var box_pt = $clipBox.position().top;
+			var box_w = $clipBox.width();
+			var s = x - box_ol;
+			var newLeft = box_pl + s;
+			var newWidth = box_w - s;
+			newLeft = newLeft<=0?0:newLeft;
+			if(newWidth+box_pt>=wrap_w){
+				return false;
+			}
+			$clipBox.css({"left":newLeft,"width":newWidth,"height":newWidth});
+			setClip();
+		}
+		function rightDown(y){
+			var box_ot = $clipBox.offset().top;
+			var box_pl = $clipBox.position().left;
+			var newHeight = y - box_ot;
+			if(newHeight+box_pl>=wrap_w){
+				return false;
+			}
+			$clipBox.css({"width":newHeight,"height":newHeight});
+			setClip();
+		}
+		function setClip(){
+			var t = $clipBox.position().top;
+			var r = $clipBox.position().left + $clipBox.width();
+			var b = $clipBox.position().top + $clipBox.height();
+			var l = $clipBox.position().left;
+			var rect = "rect("+t+"px "+r+"px "+b+"px "+l+"px)";
+			$clipPic.css("clip",rect);
+			//预览图设置
+			var w = $clipBox.width();
+			var pre_w = prebox_w / w * wrap_w ; //存在比例 prebox_w / pre_w = w / wrap_w
+			var pre_t = pre_w / wrap_w *t;  //存在比例 pre_t / t = pre_w / wrap_w
+			var pre_r = pre_w / wrap_w *r;  //存在比例 pre_r / r = pre_w / wrap_w
+			var pre_b = pre_w / wrap_w *b;  //存在比例 pre_b / b = pre_w / wrap_w
+			var pre_l = pre_w / wrap_w *l;  //存在比例 pre_l / l = pre_w / wrap_w
+			var prect = "rect("+pre_t+"px "+pre_r+"px "+pre_b+"px "+pre_l+"px)";
+			$prePic.css({"width":pre_w,"height":pre_w,"clip":prect,"left":-pre_l,"top":-pre_t});
+		}
+		setClip();
+	})
+    </script>
+  </head>
+  <body>
+		<div class="pic_wrap" id="pic_wrap">
+        	<img class="pic1" src="logo.jpg" />
+            <img class="pic2" src="logo.jpg" />
+            <div class="clip_box" id="clip_box">
+            	<span id="lt"></span>
+                <span id="rt"></span>
+                <span id="lb"></span>
+                <span id="rb"></span>
+            </div>
+        </div>
+        
+        <div id="preview" class="preview">
+        	<img class="pic3" id="pic3" src="logo.jpg" />
+        </div>
+  </body>
+</html>
