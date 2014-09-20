@@ -1,0 +1,1 @@
+require.config({paths:{jquery:"../common/jq",VJ:"../common/VajoyJS"}}),require(["jquery"],function(a){a("#outside2").html("下面是一个幻灯片")}),require(["jquery","VJ"],function(a,b){b(a("#outside")).slideFade("li_df","li_ac","arrow_left","arrow_right")});
