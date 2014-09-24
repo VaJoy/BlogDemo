@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>滚页效果</title>
+    <script src="jq.js"></script>
+    <style type="text/css">
+      body,html {height:100%; margin:0;}
+	  .screen_wrap{position:relative; height:100%; overflow:hidden;}
+	  .page{ position:relative; width:100%; height:100%;}
+	  .page0{ background:yellow;}
+	  .page1{ background:red;color:white;}
+	  .page2{ background:green;}
+	  .page3{ background:blue;color:yellow;}
+	  .page4{ background:gray; color:white;}
+	  .bottom_nav{ position:fixed; bottom:0px;padding:10px 0px;width:100%; text-align:center; background:black; opacity:0.8;}
+	  .bottom_nav a{margin:0px 10px; color:white;}
+    </style>
+    <script type="text/javascript">
+    $(function(){
+		var a_index=0,thetop,win_h;
+		var $a = $("#bottom_nav a");
+		var $wrap = $("#screen_wrap");
+		var $pages = $wrap.children();
+		var $moveWrap = $("<div></div>");
+		$moveWrap.css({"position":"relative","height":"100%"});
+		$pages.wrapAll($moveWrap);
+		var getHeight = function(){
+			win_h = $(window).height();
+			$a.eq(a_index).click();
+		  }
+		getHeight();
+		$(window).on("resize",getHeight);
+		$a.click(function(){
+			a_index = $a.index(this);
+			thetop = a_index * win_h; 
+			$pages.parent().animate({"top":-thetop},500,
+				function(){  //animate结束后的回调
+					var hasfun = eval("typeof page"+a_index+"==='function'");
+					if(hasfun){
+						eval("page"+a_index+"()");  //如果有回调函数则执行该函数
+					}
+				}
+			);
+		})
+		var page1 = function(){
+			$(".page1").animate({"opacity":"0.2"},2000);
+		}
+		var page3 = function(){
+			$(".page3").animate({"opacity":"0.5"},4000);
+		}
+	})
+    </script>
+  </head>
+  <body>
+		<div class="screen_wrap" id="screen_wrap">
+            <div class="page page0">第一页</div>
+            <div class="page page1">第二页</div>
+            <div class="page page2">第三页</div>
+            <div class="page page3">第四页</div>
+            <div class="page page4">第五页</div>
+        </div>
+        <div class="bottom_nav" id="bottom_nav">
+        <a href="#!/1">第1页</a>
+        <a href="#!/2">第2页</a>
+        <a href="#!/3">第3页</a>
+        <a href="#!/4">第4页</a>
+        <a href="#!/5">第5页</a>
+        </div>
+  </body>
+</html>
