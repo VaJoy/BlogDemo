@@ -34,7 +34,7 @@
 		$a.click(function(){
 			a_index = $a.index(this);
 			thetop = a_index * win_h; 
-			$pages.parent().animate({"top":-thetop},500,
+			$pages.parent().stop().animate({"top":-thetop},500,  //加个.stop() 防止卡顿
 				function(){  //animate结束后的回调
 					var hasfun = eval("typeof page"+a_index+"==='function'");
 					if(hasfun){
