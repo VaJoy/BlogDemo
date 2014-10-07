@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>picBox</title>
+<script src="jquery-1.11.1.js"></script>
+<style>
+html, body {
+	min-height: 100%;
+}
+.wrap {
+	width: 350px;
+	height: 500px;
+	border: solid 1px gray;
+	overflow: hidden;
+}
+h1 {
+	margin-bottom: 0px;
+	text-align: right;
+	border-bottom: solid 1px #CCCCCC;
+}
+h1 a:hover, .pic_box a:hover {
+	color: blue;
+	cursor: pointer;
+}
+.right_btn {
+	margin: 0px 20px;
+}
+.pic_wrap {
+	padding: 0px 15px;
+	width: 320px;
+	height: 430px;
+}
+.pic_box {
+	float: left;
+	margin: 10px 0px;
+	width: 150px;
+	height: 200px;
+	text-align: center;
+}
+.pic_box a {
+	display: block;
+	width: 150px;
+	height: 180px;
+	overflow: hidden;
+}
+.pic_box h6 {
+	margin: 0px;
+}
+.nomoe {
+	opacity: 0.3;
+}
+.close_btn {
+	width: 15px;
+	height: 15px;
+	text-align: center;
+	padding: 20px;
+	background: black;
+	color: white;
+	border-radius: 30px;
+	cursor: pointer;
+	font-family: "Arial";
+	opacity: 0.8;
+	font-weight: bold;
+}
+.close_btn:hover {
+	opacity: 1;
+}
+.left_arrow, .right_arrow {
+	position: absolute;
+	display: block;
+	width: 30%;
+	height: 100%;
+	opacity: 0;
+	z-index: 1003;
+}
+.left_arrow:hover, .right_arrow:hover {
+	opacity: 1;
+}
+.left_arrow {
+	left: 0;
+	background: url(img/left_arrow.png) left center no-repeat;
+}
+.right_arrow {
+	right: 0;
+	background: url(img/right_arrow.png) right center no-repeat;
+}
+</style>
+<script type="text/javascript">
+	$(function(){
+		var index,nums,page=0,shows=4,temp;
+		var $show_picBox,$black_modalback,$click_img,$title,$close,$title_wrap,$show_wrap,pic_w,pic_h;
+		var $left_btn = $("a:first","h1");
+		var $right_btn = $("a:last","h1");
+		var $picBox = $("div","#pic_wrap");
+		var page_count = Math.ceil($picBox.length/shows);
+		var $a = $("#pic_wrap a");
+		var $imgs = $picBox.find("img");
+		var $titleH6 = $picBox.find("h6");
+		var $left_arrow=$("<a href='#!/leftPic' class='left_arrow' title='上一张'></a>");
+		var $right_arrow=$("<a href='#!/rightPic' class='right_arrow' title='下一张'></a>");
+		temp=shows-1;
+		$picBox.filter("div:odd").css({"margin-left":"20px"}).end().filter("div:gt("+temp+")").hide();
+		$left_btn.addClass("nomoe");
+		if(page_count<=1) $right_btn.addClass("nomoe");
+		$left_btn.click(function(){ 
+			if(page-1>=0){
+				--page;
+				$right_btn.removeClass("nomoe");
+				nums = page*shows-1;
+				nums=nums<0?0:nums;
+				temp = (page+1)*shows;
+				$show_picBox = $picBox.filter("div:lt("+temp+")").filter("div:gt("+nums+")").show();
+				$picBox.not($show_picBox).hide();
+				if(nums==0) $picBox.eq(0).show();
+				if(!page) $left_btn.addClass("nomoe");
+			}
+		})
+		$right_btn.click(function(){ 
+			if(page+1<page_count){
+				++page;
+				$left_btn.removeClass("nomoe");
+				nums = page*shows-1;
+				temp = (page+1)*shows;
+				$show_picBox = $picBox.filter("div:lt("+temp+")").filter("div:gt("+nums+")").show();
+				$picBox.not($show_picBox).hide(); 
+				if(page>=page_count-1) $right_btn.addClass("nomoe");
+			}
+		})
+		//获取窗口大小复用
+		var VJ_getWin = function(){
+			var $win = $(window);
+			return {
+			   h:$win.height(),
+			   w:$win.width(),
+			   t:$win.scrollTop(),
+			   l:$win.scrollLeft()
+			}
+		}
+		//获取页面可视区域高度复用
+		var VJ_getBH = function(){
+			return Math.max($("body").height(),$("html").height());
+		}
+		
+		//居中模块
+		var VJ_stayCenter = function(obj,padding){
+			if(!padding) padding = 0;
+			var o_l = VJ_getWin().w/2 +padding + VJ_getWin().l;
+			var o_h = VJ_getWin().h/2 -padding + VJ_getWin().t;
+			var obj_w = -obj.width()/2;
+			var obj_h = -obj.height()/2;
+			obj.css({"left":o_l,"margin-left":obj_w, "top":o_h,"margin-top":obj_h});
+		}
+		//修改图片大小，注意得作为文档元素而非文档碎片时才能获取其大小
+		var fixPic = function(obj){
+			pic_w = obj.width();
+			pic_h = obj.height();
+			var win_w = VJ_getWin().w, win_h = VJ_getWin().h;
+			if(pic_h>win_h*0.85){
+				obj.css("height",win_h*0.85);
+			}
+			if(obj.width()>win_w*0.9){
+				obj.css({"height":"auto","width":win_w*0.9});
+			}
+		}
+		//箭头点击事件
+			var arrowClick = function(flag){
+				var instance = flag?-100:100;
+				index = flag?index+1:index-1;
+				var $allElem = $black_modalback.nextAll();
+				var cssleft = parseInt($allElem.css("left").replace("px","")) + instance;
+				$allElem.animate({"left":cssleft,"opacity":"0"},200,function(){$allElem.remove();});
+				drawPic(index);
+				$click_img.add($close).add($title).add($black_modalback).fadeIn();
+				$close.on("click",btnClose());
+			}
+		//图片显示后是否要加左右指针
+		var addArrow = function(index,obj){
+			if(index>0){
+				obj.before($left_arrow);
+				$left_arrow.click(function(){
+					arrowClick();
+				})
+			}
+			if(index<$imgs.length-1){
+				obj.before($right_arrow);
+				$right_arrow.click(function(){
+					arrowClick(1);
+				})
+			}
+		}
+		//绘制图片
+		var drawPic = function(index){
+			$click_img = $imgs.eq(index).clone();
+			$title = $("<span>"+$titleH6.eq(index).text()+"</span>");
+			$close = $("<a title='关闭'>X</a>");
+			$click_img.css({"position":"relative","padding":"15px","background":"white","z-index":1002,"display":"none"});
+			$close.css({"position":"absolute","z-index":1004,"display":"none","top":"-16px","right":"-16px"}).addClass("close_btn")
+			.click(function(){ //关闭按钮点击事件
+				$close.add($click_img).add($title).add($show_wrap).add($left_arrow).add($right_arrow).remove(); //一定要加上这一行才能删除彻底
+				$black_modalback.nextAll().andSelf().remove();
+			});
+			$title.css({"position":"relative","padding":"5px 15px","background":"black","color":"white","z-index":1002,"display":"none","border-radius":"6px"});
+			$("body").append($close).append($click_img).append($title).append($show_wrap);
+			fixPic($click_img);
+			//把全部元素包裹到一个div中
+			$show_wrap = $("<div></div>").css({"position":"absolute","width":$click_img.width()+30,"height":$click_img.height()+30});
+			$click_img.add($close).add($title).wrapAll($show_wrap);
+			//title再包一层，以便居中
+			$title_wrap = $("<h5></h5>").css({"text-align":"center","margin":"5px 0 0 0"});
+			$title.wrapAll($title_wrap);
+			//$show_wrap居中
+			$show_wrap = $click_img.closest("div"); //到这里会失效，得重新获取
+			VJ_stayCenter($show_wrap,15); 
+			addArrow(index,$click_img);
+		}
+		$a.click(function(){ 
+			index = $(this).index("#pic_wrap a");
+			$black_modalback = $("<div></div>").css({"position":"absolute","width":"100%","height":VJ_getBH(),"background":"black","opacity":"0.6","left":"0","top":"0","z-index":1001,"display":"none"});
+			$("body").append($black_modalback);
+			drawPic(index);
+
+			//显示出来
+			$click_img.add($close).add($title).add($black_modalback).fadeIn();
+		})
+	})
+</script>
+</head>
+<body>
+<div class="wrap">
+  <h1> <a class="left_btn"><</a><a class="right_btn">></a> </h1>
+  <div class="pic_wrap" id="pic_wrap">
+    <div class="pic_box"> <a><img src="img/1.jpg" /></a>
+      <h6>图片1</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/2.jpg" /></a>
+      <h6>图片2</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/3.jpg" /></a>
+      <h6>图片3</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/4.jpg" /></a>
+      <h6>图片4</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/5.jpg" /></a>
+      <h6>图片5</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/6.jpg" /></a>
+      <h6>图片6</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/7.jpg" /></a>
+      <h6>图片7</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/8.jpg" /></a>
+      <h6>图片8</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/9.jpg" /></a>
+      <h6>图片9</h6>
+    </div>
+    <div class="pic_box"> <a><img src="img/10.jpg" /></a>
+      <h6>图片10</h6>
+    </div>
+  </div>
+</div>
+<!--wrap结束-->
+</body>
+</html>
